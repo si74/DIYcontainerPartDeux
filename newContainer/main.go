@@ -7,6 +7,22 @@ import (
 	"syscall"
 )
 
+type Mount struct {
+	Source string
+	Target string
+	Fs     string
+	Flags  int
+	Data   string
+}
+
+type Cfg struct {
+	Path     string
+	Args     []string
+	Hostname string
+	Mounts   []Mount
+	Rootfs   string
+}
+
 func main() {
 	switch os.Args[1] {
 	case "run":
@@ -41,18 +57,6 @@ func child() {
 	cmd.Stdin = os.Stdin
 	cmd.Stderr = os.Stderr
 	cmd.Stdout = os.Stdout
-
-	// TODO(si74) - Need to add own filesystem
-	//OPTION 1: get root filesystem, change directory path, and mount empty proc
-	must(syscall.Chroot("/home/rootfs"))
-	must(os.Chdir("/"))
-	must(syscall.Mount("proc", "proc", "proc", 0, ""))
-
-	// OPTION 2: Mount root file system and pivot to root
-	// must(syscall.Mount("rootfs", "rootfs", "", syscall.MS_BIND, ""))
-	// must(os.MkdirAll("rootfs/oldrootfs", 0700))
-	// must(syscall.PivotRoot("rootfs", "rootfs/oldrootfs"))
-	// must(os.Chdir("/"))
 
 	must(cmd.Run())
 }
